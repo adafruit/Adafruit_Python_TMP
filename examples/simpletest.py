@@ -29,6 +29,11 @@ import time
 import Adafruit_TMP.TMP006 as TMP006
 
 
+# Define a function to convert celsius to fahrenheit.
+def c_to_f(c):
+		return c * 9.0 / 5.0 + 32.0
+
+
 # Default constructor will use the default I2C address (0x40) and pick a default I2C bus.
 #
 # For the Raspberry Pi this means you should hook up to the only exposed I2C bus
@@ -54,6 +59,8 @@ sensor.begin()
 # Loop printing measurements every second.
 print 'Press Ctrl-C to quit.'
 while True:
-	print 'Object temperature: {0:0.4F} *C'.format(sensor.readObjTempC())
-	print '   Die temperature: {0:0.4F} *C'.format(sensor.readDieTempC())
+	obj_temp = sensor.readObjTempC()
+	die_temp = sensor.readDieTempC()
+	print 'Object temperature: {0:0.3F}*C / {1:0.3F}*F'.format(obj_temp, c_to_f(obj_temp))
+	print '   Die temperature: {0:0.3F}*C / {1:0.3F}*F'.format(die_temp, c_to_f(die_temp))
 	time.sleep(1.0)

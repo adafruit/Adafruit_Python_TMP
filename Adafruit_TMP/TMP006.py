@@ -84,7 +84,12 @@ class TMP006(object):
 		self._logger.debug('Using samplerate value: {0:04X}'.format(samplerate))
 		# Set configuration register to turn on chip, enable data ready output,
 		# and start sampling at the specified rate.
-		self._device.write16(TMP006_CONFIG, TMP006_CFG_MODEON | TMP006_CFG_DRDYEN | samplerate)
+		config = TMP006_CFG_MODEON | TMP006_CFG_DRDYEN | samplerate
+		# Flip byte order of config value because write16 uses little endian but we
+		# need big endian here.  This is an ugly hack for now, better to add support
+		# in write16 for explicit endians.
+		config = ((config & 0xFF) << 8) | (config >> 8)
+		self._device.write16(TMP006_CONFIG, config)
 		# Check manufacturer and device ID match expected values.
 		mid = self._device.readU16BE(TMP006_MANID)
 		did = self._device.readU16BE(TMP006_DEVID)

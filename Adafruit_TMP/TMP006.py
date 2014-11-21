@@ -21,8 +21,6 @@
 import logging
 import math
 
-import Adafruit_GPIO.I2C as I2C
-
 
 # Coefficient values, found from this whitepaper:
 # http://www.ti.com/lit/ug/sbou107/sbou107.pdf
@@ -62,13 +60,16 @@ class TMP006(object):
 	board.
 	"""
 
-	def __init__(self, address=TMP006_I2CADDR, busnum=I2C.get_default_bus()):
+	def __init__(self, address=TMP006_I2CADDR, i2c=None, **kwargs):
 		"""Initialize TMP006 device on the specified I2C address and bus number.
 		Address defaults to 0x40 and bus number defaults to the appropriate bus
 		for the hardware.
 		"""
 		self._logger = logging.getLogger('Adafruit_TMP.TMP006')
-		self._device = I2C.Device(address, busnum)
+		if i2c is None:
+			import Adafruit_GPIO.I2C as I2C
+			i2c = I2C
+		self._device = i2c.get_i2c_device(address, **kwargs)
 
 	def begin(self, samplerate=CFG_16SAMPLE):
 		"""Start taking temperature measurements.  Samplerate can be one of

@@ -23,9 +23,10 @@
 # Can enable debug output by uncommenting:
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
-
 import time
 
+# Note that this will work with the TMP007 sensor too!  Just use the TMP006
+# class below as-is.
 import Adafruit_TMP.TMP006 as TMP006
 
 
@@ -42,6 +43,8 @@ def c_to_f(c):
 #
 # For the Beaglebone Black the library will assume bus 1 by default, which is
 # exposed with SCL = P9_19 and SDA = P9_20.
+#
+# Remember this TMP006 code will work fine with the TMP007 sensor too!
 sensor = TMP006.TMP006()
 
 # Optionally you can override the address and/or bus number:

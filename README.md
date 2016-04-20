@@ -1,7 +1,7 @@
 Adafruit Python TMP006
 ======================
 
-Python library for accessing the TMP006 non-contact temperature sensor on a Raspberry Pi or Beaglebone Black.
+Python library for accessing the TMP006 & TMP007 non-contact temperature sensor on a Raspberry Pi or Beaglebone Black.
 
 Designed specifically to work with the Adafruit TMP006 sensor ----> https://www.adafruit.com/products/1296
 
@@ -21,7 +21,8 @@ sudo python setup.py install
 
 Make sure you have internet access on the device so it can download the required dependencies.
 
-See examples of usage in the examples folder.
+See examples of usage in the examples folder.  Note that the example code and classes
+use the TMP006 name but will work fine with a TMP007 sensor too.
 
 Adafruit invests time and resources providing this open source code, please support Adafruit and open-source hardware by purchasing products from Adafruit!
 

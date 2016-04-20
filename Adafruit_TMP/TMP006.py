@@ -56,107 +56,107 @@ TMP006_CFG_DRDY     = 0x0080
 
 
 class TMP006(object):
-	"""Class to represent an Adafruit TMP006 non-contact temperature measurement
-	board.
-	"""
+    """Class to represent an Adafruit TMP006 non-contact temperature measurement
+    board.
+    """
 
-	def __init__(self, address=TMP006_I2CADDR, i2c=None, **kwargs):
-		"""Initialize TMP006 device on the specified I2C address and bus number.
-		Address defaults to 0x40 and bus number defaults to the appropriate bus
-		for the hardware.
-		"""
-		self._logger = logging.getLogger('Adafruit_TMP.TMP006')
-		if i2c is None:
-			import Adafruit_GPIO.I2C as I2C
-			i2c = I2C
-		self._device = i2c.get_i2c_device(address, **kwargs)
+    def __init__(self, address=TMP006_I2CADDR, i2c=None, **kwargs):
+        """Initialize TMP006 device on the specified I2C address and bus number.
+        Address defaults to 0x40 and bus number defaults to the appropriate bus
+        for the hardware.
+        """
+        self._logger = logging.getLogger('Adafruit_TMP.TMP006')
+        if i2c is None:
+            import Adafruit_GPIO.I2C as I2C
+            i2c = I2C
+        self._device = i2c.get_i2c_device(address, **kwargs)
 
-	def begin(self, samplerate=CFG_16SAMPLE):
-		"""Start taking temperature measurements.  Samplerate can be one of
-		TMP006_CFG_1SAMPLE, TMP006_CFG_2SAMPLE, TMP006_CFG_4SAMPLE,
-		TMP006_CFG_8SAMPLE, or TMP006_CFG_16SAMPLE.  The default is 16 samples
-		for the highest resolution.  Returns True if the device is intialized,
-		False otherwise.
-		"""
-		if samplerate not in (CFG_1SAMPLE, CFG_2SAMPLE, CFG_4SAMPLE, CFG_8SAMPLE, 
-			CFG_16SAMPLE):
-			raise ValueError('Unexpected samplerate value! Must be one of: ' \
-				'CFG_1SAMPLE, CFG_2SAMPLE, CFG_4SAMPLE, CFG_8SAMPLE, or CFG_16SAMPLE')
-		self._logger.debug('Using samplerate value: {0:04X}'.format(samplerate))
-		# Set configuration register to turn on chip, enable data ready output,
-		# and start sampling at the specified rate.
-		config = TMP006_CFG_MODEON | TMP006_CFG_DRDYEN | samplerate
-		# Flip byte order of config value because write16 uses little endian but we
-		# need big endian here.  This is an ugly hack for now, better to add support
-		# in write16 for explicit endians.
-		config = ((config & 0xFF) << 8) | (config >> 8)
-		self._device.write16(TMP006_CONFIG, config)
-		# Check manufacturer and device ID match expected values.
-		mid = self._device.readU16BE(TMP006_MANID)
-		did = self._device.readU16BE(TMP006_DEVID)
-		self._logger.debug('Read manufacturer ID: {0:04X}'.format(mid))
-		self._logger.debug('Read device ID: {0:04X}'.format(did))
-		return mid == 0x5449 and did == 0x0067
+    def begin(self, samplerate=CFG_16SAMPLE):
+        """Start taking temperature measurements.  Samplerate can be one of
+        TMP006_CFG_1SAMPLE, TMP006_CFG_2SAMPLE, TMP006_CFG_4SAMPLE,
+        TMP006_CFG_8SAMPLE, or TMP006_CFG_16SAMPLE.  The default is 16 samples
+        for the highest resolution.  Returns True if the device is intialized,
+        False otherwise.
+        """
+        if samplerate not in (CFG_1SAMPLE, CFG_2SAMPLE, CFG_4SAMPLE, CFG_8SAMPLE,
+            CFG_16SAMPLE):
+            raise ValueError('Unexpected samplerate value! Must be one of: ' \
+                'CFG_1SAMPLE, CFG_2SAMPLE, CFG_4SAMPLE, CFG_8SAMPLE, or CFG_16SAMPLE')
+        self._logger.debug('Using samplerate value: {0:04X}'.format(samplerate))
+        # Set configuration register to turn on chip, enable data ready output,
+        # and start sampling at the specified rate.
+        config = TMP006_CFG_MODEON | TMP006_CFG_DRDYEN | samplerate
+        # Flip byte order of config value because write16 uses little endian but we
+        # need big endian here.  This is an ugly hack for now, better to add support
+        # in write16 for explicit endians.
+        config = ((config & 0xFF) << 8) | (config >> 8)
+        self._device.write16(TMP006_CONFIG, config)
+        # Check manufacturer and device ID match expected values.
+        mid = self._device.readU16BE(TMP006_MANID)
+        did = self._device.readU16BE(TMP006_DEVID)
+        self._logger.debug('Read manufacturer ID: {0:04X}'.format(mid))
+        self._logger.debug('Read device ID: {0:04X}'.format(did))
+        return mid == 0x5449 and did == 0x0067
 
-	def sleep(self):
-		"""Put TMP006 into low power sleep mode.  No measurement data will be
-		updated while in sleep mode.
-		"""
-		control = self._device.readU16BE(TMP006_CONFIG)
-		control &= ~(TMP006_CFG_MODEON)
-		self._device.write16(TMP006_CONFIG, control)
-		self._logger.debug('TMP006 entered sleep mode.')
+    def sleep(self):
+        """Put TMP006 into low power sleep mode.  No measurement data will be
+        updated while in sleep mode.
+        """
+        control = self._device.readU16BE(TMP006_CONFIG)
+        control &= ~(TMP006_CFG_MODEON)
+        self._device.write16(TMP006_CONFIG, control)
+        self._logger.debug('TMP006 entered sleep mode.')
 
-	def wake(self):
-		"""Wake up TMP006 from low power sleep mode."""
-		control = self._device.readU16BE(TMP006_CONFIG)
-		control |= TMP006_CFG_MODEON
-		self._device.write16(TMP006_CONFIG, control)
-		self._logger.debug('TMP006 woke from sleep mode.')
+    def wake(self):
+        """Wake up TMP006 from low power sleep mode."""
+        control = self._device.readU16BE(TMP006_CONFIG)
+        control |= TMP006_CFG_MODEON
+        self._device.write16(TMP006_CONFIG, control)
+        self._logger.debug('TMP006 woke from sleep mode.')
 
-	def readRawVoltage(self):
-		"""Read raw voltage from TMP006 sensor.  Meant to be used in the
-		calculation of temperature values.
-		"""
-		raw = self._device.readS16BE(TMP006_VOBJ)
-		self._logger.debug('Raw voltage: 0x{0:04X} ({1:0.4F} uV)'.format(raw & 0xFFFF,
-			raw * 156.25 / 1000.0))
-		return raw
+    def readRawVoltage(self):
+        """Read raw voltage from TMP006 sensor.  Meant to be used in the
+        calculation of temperature values.
+        """
+        raw = self._device.readS16BE(TMP006_VOBJ)
+        self._logger.debug('Raw voltage: 0x{0:04X} ({1:0.4F} uV)'.format(raw & 0xFFFF,
+            raw * 156.25 / 1000.0))
+        return raw
 
-	def readRawDieTemperature(self):
-		"""Read raw die temperature from TMP006 sensor.  Meant to be used in the
-		calculation of temperature values.
-		"""
-		raw = self._device.readS16BE(TMP006_TAMB)
-		self._logger.debug('Raw temperature: 0x{0:04X} ({1:0.4F} *C)'.format(raw & 0xFFFF,
-			raw / 4.0 * 0.03125))
-		return raw >> 2
+    def readRawDieTemperature(self):
+        """Read raw die temperature from TMP006 sensor.  Meant to be used in the
+        calculation of temperature values.
+        """
+        raw = self._device.readS16BE(TMP006_TAMB)
+        self._logger.debug('Raw temperature: 0x{0:04X} ({1:0.4F} *C)'.format(raw & 0xFFFF,
+            raw / 4.0 * 0.03125))
+        return raw >> 2
 
-	def readDieTempC(self):
-		"""Read sensor die temperature and return its value in degrees celsius."""
-		Tdie = self.readRawDieTemperature()
-		return Tdie * 0.03125
+    def readDieTempC(self):
+        """Read sensor die temperature and return its value in degrees celsius."""
+        Tdie = self.readRawDieTemperature()
+        return Tdie * 0.03125
 
-	def readObjTempC(self):
-		"""Read sensor object temperature (i.e. temperature of item in front of
-		the sensor) and return its value in degrees celsius."""
-		# Read raw values and scale them to required units.
-		Tdie = self.readRawDieTemperature()
-		Vobj = self.readRawVoltage()
-		Vobj *= 156.25         # 156.25 nV per bit
-		self._logger.debug('Vobj = {0:0.4} nV'.format(Vobj))
-		Vobj /= 1000000000.0   # Convert nV to volts
-		Tdie *= 0.03125        # Convert to celsius
-		Tdie += 273.14         # Convert to kelvin
-		self._logger.debug('Tdie = {0:0.4} K'.format(Tdie))
-		# Compute object temperature following equations from:
-		# http://www.ti.com/lit/ug/sbou107/sbou107.pdf
-		Tdie_ref = Tdie - TMP006_TREF
-		S = 1.0 + TMP006_A1*Tdie_ref + TMP006_A2*math.pow(Tdie_ref, 2.0)
-		S *= TMP006_S0
-		S /= 10000000.0
-		S /= 10000000.0
-		Vos = TMP006_B0 + TMP006_B1*Tdie_ref + TMP006_B2*math.pow(Tdie_ref, 2.0)
-		fVobj = (Vobj - Vos) + TMP006_C2*math.pow((Vobj - Vos), 2.0)
-		Tobj = math.sqrt(math.sqrt(math.pow(Tdie, 4.0) + (fVobj/S)))
-		return Tobj - 273.15
+    def readObjTempC(self):
+        """Read sensor object temperature (i.e. temperature of item in front of
+        the sensor) and return its value in degrees celsius."""
+        # Read raw values and scale them to required units.
+        Tdie = self.readRawDieTemperature()
+        Vobj = self.readRawVoltage()
+        Vobj *= 156.25         # 156.25 nV per bit
+        self._logger.debug('Vobj = {0:0.4} nV'.format(Vobj))
+        Vobj /= 1000000000.0   # Convert nV to volts
+        Tdie *= 0.03125        # Convert to celsius
+        Tdie += 273.14         # Convert to kelvin
+        self._logger.debug('Tdie = {0:0.4} K'.format(Tdie))
+        # Compute object temperature following equations from:
+        # http://www.ti.com/lit/ug/sbou107/sbou107.pdf
+        Tdie_ref = Tdie - TMP006_TREF
+        S = 1.0 + TMP006_A1*Tdie_ref + TMP006_A2*math.pow(Tdie_ref, 2.0)
+        S *= TMP006_S0
+        S /= 10000000.0
+        S /= 10000000.0
+        Vos = TMP006_B0 + TMP006_B1*Tdie_ref + TMP006_B2*math.pow(Tdie_ref, 2.0)
+        fVobj = (Vobj - Vos) + TMP006_C2*math.pow((Vobj - Vos), 2.0)
+        Tobj = math.sqrt(math.sqrt(math.pow(Tdie, 4.0) + (fVobj/S)))
+        return Tobj - 273.15

@@ -1,5 +1,17 @@
-Adafruit Python TMP006
-======================
+
+DEPRECATED LIBRARY Adafruit Python TMP006
+===================
+
+This library has been deprecated!
+
+the tmp006 and tmp007 are no longer made, and we are now only using our circuitpython sensor libraries in python
+
+we are leaving the code up for historical/research purposes but archiving the repository.
+
+if you happen to have one, check out this guide for using the tmp007 with python!
+https://learn.adafruit.com/adafruit-tmp007-sensor-breakout
+
+#
 
 Python library for accessing the TMP006 & TMP007 non-contact temperature sensor on a Raspberry Pi or Beaglebone Black.
 

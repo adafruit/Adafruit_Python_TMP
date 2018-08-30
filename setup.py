@@ -18,7 +18,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 from setuptools import setup, find_packages
 
 setup(name              = 'Adafruit_TMP',
-      version           = '1.6.2',
+      version           = '1.6.3',
       author            = 'Tony DiCola',
       author_email      = 'tdicola@adafruit.com',
       description       = 'Library for accessing the TMP006 & TMP007  non-contact temperature sensor on a Raspberry Pi or Beaglebone Black.',
